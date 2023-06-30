@@ -1,0 +1,160 @@
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <a href="<?= base_url('transaksi/hapus') ?>" class="btn btn-danger float-right ml-1"><i class="fa fa-trash-alt"></i> Reset Order</a>
+            <button type="button" class="btn btn-success float-right" data-toggle="modal" data-target=".bd-example-modal-lg"><i class="fa fa-search"></i> Daftar Perbaikan</button>
+            <h5 class="m-0 font-weight-bold text-dark"><i class="fa fa-shopping-cart"></i> Input Order</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered mb-3">
+                <tr>
+                    <td style="text-align: center;"><b>Kode Invoice</b></td>
+                    <td><input type="text" readonly="readonly" class="form-control" name="kode" value="<?= $kode; ?>"></td>
+                </tr>
+            </table>
+            <div class="table-responsive">
+                <table class="table table-bordered text-center" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kode Jasa</th>
+                            <th>Nama Jasa</th>
+                            <th>Harga</th>
+                            <th>Jumlah Panel</th>
+                            <th>Satuan</th>
+                            <th>Total</th>
+                            <th>Admin</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $total_bayar = 0;
+                        $no = 1;
+                        foreach ($penjualan as $p) {
+                            $total_bayar += $p['total'];
+                        ?>
+                            <tr>
+                                <td><?= $no++ ?></td>
+                                <td><?= $p['id_barang']; ?></td>
+                                <td><?= $p['barang']; ?></td>
+                                <td>Rp. <?= number_format($p['harga']); ?></td>
+                                <td>
+                                    <form action="<?= base_url('transaksi/jumlahbeli') ?>" method="post">
+                                        <input type="number" name="jumlah" class="form-control" Placeholder="Masukan Jumlah Beli" value=<?= $p['jumlah']; ?>>
+                                        <input type="hidden" name="id_barang" value="<?= $p['id_barang']; ?>">
+                                        <input type="hidden" name="barang" value="<?= $p['barang']; ?>">
+                                        <input type="hidden" name="id_penjualan" value="<?= $p['id_penjualan']; ?>">
+                                        <input type="hidden" name="stok" value="<?= $p['stok']; ?>">
+                                    </form>
+                                </td>
+                                <td><?= $p['satuan']; ?></td>
+                                <td>Rp. <?= number_format($p['total']); ?></td>
+                                <td><?= $p['user']; ?></td>
+                                <td>
+                                    <a href="<?= base_url('transaksi/hapusbyid/') . $p['id_penjualan'] ?>" class="btn btn-danger"><i class="fa fa-times"></i></a>
+                                </td>
+                            </tr>
+                        <?php
+                        }
+                        ?>
+                    </tbody>
+                </table>
+
+                <table class="table table-stripped mt-4">
+                    <form method="post" action="<?= base_url('transaksi/bayar'); ?>">
+                        <?php
+                        foreach ($penjualan as $p) { ?>
+                            <input type="hidden" name="id_barang" value="<?= $p['id_barang']; ?>">
+                            <input type="hidden" name="id_user" value="<?= $p['id_user']; ?>">
+                            <input type="hidden" name="jumlah" value="<?= $p['jumlah']; ?>">
+                            <input type="hidden" name="total" value="<?= $p['total']; ?>">
+                        <?php
+                        }
+                        ?>
+                        <tr>
+                            <td>Total Semua </td>
+                            <td>
+                                <input type="text" class="form-control" name="total_semua" id="total" value="<?= $total_bayar; ?>" readonly>
+                            </td>
+                            <td>Pelanggan </td>
+                            <td>
+                                <select name="pelanggan" class=form-control>
+                                <?php echo $options; ?>
+
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Kembalian</td>
+                            <td><input type="text" class="form-control" name="kembali" id="kembali" readonly></td>
+                            <td>Bayar</td>
+                            <td>
+                                <input type="number" class="form-control" onkeyup="transaksi();" name="bayar" id="bayar">
+                                <input type="hidden" name="kode" value="<?= $kode; ?>">
+                            </td>
+                            <td>
+                                <button type="submit" class="btn btn-success" onclick="return confirm('Apakah anda ingin melakukan input order ini ???')"><i class="fa fa-shopping-cart"></i> Input</button>
+                            </td>
+                        </tr>
+                    </form>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal Barang -->
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newStudentModalLabel">Pilih Perbaikan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped text-center" id="databarang" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Kode Jasa</th>
+                                    <th>Nama Jasa</th>
+                                    <th>Kategori</th>
+                                    <th>Harga</th>
+                                    <th>Stok</th>
+                                    <th>Satuan</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $no = 1;
+                                foreach ($barang as $b) {
+                                ?>
+                                    <tr>
+                                        <td><?= $no++ ?></td>
+                                        <td><?= $b['id_barang']; ?></td>
+                                        <td><?= $b['barang']; ?></td>
+                                        <td><?= $b['nama_kategori']; ?></td>
+                                        <td>Rp. <?= number_format($b['harga']); ?></td>
+                                        <td><?= $b['stok']; ?></td>
+                                        <td><?= $b['satuan']; ?></td>
+                                        <td>
+                                            <a href="<?= base_url('transaksi/add/') . $b['id_barang']; ?>" class="btn btn-success btn-sm"><i class="fa fa-cart-plus"></i> Pilih</a>
+                                        </td>
+                                    </tr>
+                                <?php
+                                }
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
